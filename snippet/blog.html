@@ -1,0 +1,130 @@
+<div id="blog-container" class="container">
+
+	<!-- breadcrumb row -->
+	<div class="row pbl breadcrumb-row">
+		<div class="col-lg-12 breadcrumb">
+			{% if items.size > 1 %}
+				<div class="mls">{% breadcrumb params: '?order=c&direction=desc', separator: ' &gt; ' %}</div>
+			{% else %}
+				{% assign breadcrumb_title = item.contents.first.title %}
+				<div class="mls">{% breadcrumb params: '?order=c&direction=desc', separator: ' &gt; ', title: breadcrumb_title %}</div>
+			{% endif %}
+		</div>
+	</div>
+	
+	<div class="row">
+		
+		<!-- index of latest articles -->
+		<div class="col-lg-3 col-md-4 col-sm-5 blog-nav">
+			<div class="hidden-xs">
+			
+				{% if items.size > 1 %}
+				
+					<h1 class="mbl mtl mll">{% slug_title %}</h1>
+
+					<div class="list-group mtl">
+						{% latest link: slug, total: 10, order: created_at, direction: desc %}
+							{{ item.contents.first.title | link: item.url, '', 'list-group-item' }}
+						{% endlatest %}
+					</div>
+					
+				{% else %}
+			
+					<h1 class="mbl mtl mll">{% slug_title 1 %}</h1>
+
+					<div class="list-group mtl">
+						{% latest total: 10, order: created_at, direction: desc %}							
+							<a href="{{ item.url }}" class="list-group-item{% if slug == item.links.first.slug %} active{% endif %}">{{ item.contents.first.title }}</a>
+						{% endlatest %}
+					</div>
+					
+				{% endif %}
+
+			</div>
+		</div>
+		
+		
+		<div class="col-lg-9 col-md-8 col-sm-7">
+			
+			{% if items.size > 1 %}
+
+				<!-- index of articles -->
+
+				{% for each i in items %}
+					<article class="blog mtl mll">
+						<header>
+							
+							<!-- when this article was created -->
+							<time datetime="{{ i.created_at | format_date: 'military' }}">
+								<i class="fa fa-time"></i>
+								{% if i.recent? %}
+									{{ i.created_at | time_ago_in_words }} ago
+								{% else %}
+									{{ i.created_at | format_date: 'short_date' }}
+								{% endif %}
+							</time>
+							
+							<h1>{{ i.contents.first.title | link: i.url }}</h1>
+							<h2>{{ i.contents.first.teaser | truncate_words: 100 }}</h2>
+							
+							<p>
+								<a href="{{ i.url }}" class="btn btn-mini">Read <i class="fa fa-chevron-right"></i></a>
+							</p>
+						</header>
+					</article>
+				{% endfor %}
+			
+			{% else %}
+			
+				<article class="blog mtl mll">
+					
+					<header>
+						<h1>{{ item.contents.first.title }}</h1>
+						<h2>{{ item.contents.first.teaser }}</h2>
+					</header>
+					
+					{% if item.images? %}
+					<section class="one-column">
+						<div id="owl-home">
+							{% for each img in item.images %}
+								<div class="item">
+									{{ img.column_24 | asset_url | image: 'img-responsive' }}
+								</div>
+							{% endfor %}
+						</div>
+					</section>
+					{% endif %}
+					
+					{% for each c in item.contents %}
+						{% if forloop.index0 == 0 %}
+							<section class="two-column">{{ c.content }}</section>
+						{% else %}
+							<section class="one-column">{{ c.content }}</section>
+						{% endif %}
+					{% endfor %}
+					
+				</article>
+				
+				<div class="mtl mbl">
+					
+					<button onclick="window.history.go(-1);return false;" class="btn">
+						<i class="fa fa-chevron-left"></i> Back
+					</button>
+					
+					{% if current_user.admin? %}
+						<a href="{{ item.edit_url }}" class="btn" rel="tooltip" title="Edit this item"><i class="fa fa-pencil"></i></a>
+						<a href="/__/items/new" class="btn" rel="tooltip" title="Add a new item"><i class="fa fa-plus"></i></a>
+					{% endif %}
+					
+				</div>
+			{% endif %}
+			
+			{% if items.size > 1 %}
+			<div class="row">
+				<div class="col-md-12 mbl mtl">{{ pagination }}</div>
+			</div>
+			{% endif %}
+			
+		</div>
+	</div>
+</div>
